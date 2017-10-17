@@ -1,4 +1,3 @@
-
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.Map;
@@ -24,6 +23,9 @@ class TreeNode{
 class ListNode{
     ListNode next;
     char val;
+    public ListNode(char val){
+        this.val = val;
+    }
 }
 
 class PostIterator{
@@ -94,14 +96,28 @@ public class Ixl{
     
         //@TEST12  //TODO
 
-        //@TEST13  not finished
+        //@TEST13  test
         // implemente the quick sort function
+        // *P
+        //int[] test = {1, 9, 5, 3, 7, 11};
+        //System.out.println(findKthOpt(5, test));
 
         //@TEST14 *P
 
         //@TEST15 NoN
  
-        //@TEST16 
+        //@TEST16 *P
+        // ListNode head = new ListNode('a');
+        // head.next = new ListNode('b');
+        // head.next.next =  new ListNode('a');
+        // head.next.next.next =  new ListNode('a');
+        // System.out.println(isPaland(head)); 
+        // ListNode cur = head;
+        // while(cur != null){
+        //     System.out.print(cur.val);
+        //     cur = cur.next;
+        // }
+        
 
         //@TEST17  TestR!
 
@@ -109,6 +125,12 @@ public class Ixl{
         
         //@TEST20
 
+
+        //@TEST23 
+        List<String> test = dearrangement("1234");
+        for(String cur:test){
+            System.out.println(cur);
+        }
 
     }
 
@@ -318,11 +340,13 @@ public class Ixl{
         int result = nums.get((int)(Math.random() * nums.size()));
         return result;
     }
+    // note the fomula for nth fabnacci number:  Fn = （(sqrt(5) + 1))^n - (sqrt(5) - 1)^(-n) / sqrt(5);
+
+
 
     //12.lc 46, give a collection of distinict integers, return all permuations
     // allow duplicates for input string
     public static List<List<Integer>> generatePermuation(List<Integer> nums){  
-
         // consider the case with duplicate
         List<List<Integer>> result = new ArrayList<List<Integer>>();
         Collections.sort(nums);
@@ -349,7 +373,26 @@ public class Ixl{
         }
     }
     // sides: consider, combinaion sum && subset refer to lc, add to practice list
-    
+
+    // subset from the given list
+    public static List<List<Integer>> subset(List<Integer> nums){
+        Collections.sort(nums);
+        List<List<Integer>> result = new ArrayList<List<Integer>>();
+        generateSubset(nums, new ArrayList<Integer>(), result, 0);
+        return result;
+    }
+    private static void generateSubset(List<Integer> nums, List<Integer> cur, List<List<Integer>> result, int start){
+        //if(cur.size() > nums.size()) return; never used base case
+        result.add(new ArrayList(cur));
+        for(int i = start; i < nums.size(); i++){
+            cur.add(nums.get(i));
+            generateSubset(nums, cur, result, i + 1);
+            cur.remove(cur.size() - 1); 
+        }
+    }
+
+
+
     //13. find the kth largest number for given array
     // refer to lc, find kth value
     public static int findKth(int k, int[] nums){
@@ -367,11 +410,9 @@ public class Ixl{
     }
 
     // method2 using quick sort, divide conquer
-
     public static int findKthOpt(int k, int[] nums){
         return findKth(nums, 0, nums.length - 1, k);
     }
-
     private static int findKth(int[] nums, int start, int end,  int k){
         // not find the kth elemement;
         if(start > end) return -1;
@@ -383,8 +424,8 @@ public class Ixl{
             }
         }
         swap(nums, left, end); 
-        if(left == k) return  nums[k];
-        else if(left < k){
+        if(left  == k - 1) return  nums[left];
+        else if(left < k - 1){
             return findKth(nums, left + 1, end, k);
         }else {
             return findKth(nums, start, left - 1, k);
@@ -420,15 +461,29 @@ public class Ixl{
         }
         return dp[grid[0].length - 1];
     }
-    
+
+    // recursion way to find the min path
+    public static int minPath(int[][] grid, int x, int y){
+        if(x >= grid.length || y >= grid[0].length){
+            return Integer.MAX_VALUE;
+        }
+        if(x == grid.length - 1 && y == grid[0].length - 1){
+            return grid[x][y] ;
+        }
+        return Math.min(minPath(grid, x + 1, y), minPath(grid, x, y + 1)) + grid[x][y];
+    }
+
+
     //15. give a n*n square, how many small square you can find 
     
     public static int numSquare(int n){  // lenth of square
         int result = 0;
-        for(int i = 0; i <= n; i++){
+        for(int i = 1; i <= n; i++){
             result += i*i;
         }
         return result;
+
+        // note: the fomula for square sum is,  n(n + 1)(2n + 1) / 6;
     }
 
     //expand, if not square, a rectangle
@@ -446,17 +501,22 @@ public class Ixl{
             fast = fast.next.next; 
             slow = slow.next;
         }
+        if(slow.next == null) return true;
         ListNode rightHalf = reverseList(slow.next);
         ListNode leftHalf = input;
         ListNode temp = rightHalf;
         // reverse the 2nd half according to whether its even of odd by fast pointer
+        boolean result = true;
         do{ 
-            if(leftHalf.val != temp.val) return false;   
+            if(leftHalf.val != temp.val) {
+                result = false;
+                break; 
+            }   
             leftHalf = leftHalf.next;
-            rightHalf = temp.next;
+            temp = temp.next;
         } while(leftHalf != null && temp != null);
-        slow.next = reverseList(temp);
-        return true;    
+        slow.next = reverseList(rightHalf);
+        return result;    
     }
     private static ListNode reverseList(ListNode head){
         ListNode pre = null;
@@ -469,16 +529,24 @@ public class Ixl{
         }
         return pre;
     }
-    private static boolean checkPalan(ListNode l1, ListNode l2){
-        while(l1 != null && l2 != null) {
-            if(l1 == null || l2 == null || l1.val != l2.val) return false;
-            l1 = l1.next;
-            l2 = l2.next;
-        }
-        return true;
-    }
-    // solution 2, using a stack to store all the node and compare
 
+    // solution 2, using a stack to store all the node and compare
+    public static boolean isPaland(ListNode head){
+        if(head == null || head.next == null) return true;
+        Stack<ListNode> st = new Stack();
+        ListNode cur = head;
+        while(cur != null){
+            st.push(cur);
+            cur = cur.next;
+        }
+        cur = st.pop();
+        do {
+            if(cur.val != head.val) return false;
+            cur = st.pop();
+            head = head.next;
+        } while(head != cur && head.next != cur);
+        return head.val == cur.val; 
+    }
 
 
     //17. LC 199 Binary Tree Right Side View
@@ -522,9 +590,6 @@ public class Ixl{
     }
 
 
-    
-
-
     //19. iterative post order traverse a binary tree // implemented on top of the class
     // using a queue to store the node traverse
     public static void postIterator(TreeNode root){
@@ -554,17 +619,48 @@ public class Ixl{
         }
         return prefix;
     }
-
     // Vertical scanning by comparing each character for each column;
+
+    // implemented tomorrow //:
+    public static String findCommonFre( List<String> input){
+        // corner case 
+        for(int i = 0; i < input.get(0).length(); i++){
+            char cur = input.get(0).charAt(i);
+            for(int j = 1; j < input.size(); j++){
+                if(i == input.get(i).length() || input.get(i).charAt(i) != cur){
+                    return input.get(0).substring(0, i);
+                }
+            }
+        }
+        return input.get(0);
+    }
 
 
     //21 return num of elements for given chimesimt fomula Fe3O4
 
-
     //22.find Last Byte
 
 
+    //23. return dearrangement of a string
+    public static List<String> dearrangement(String input){
+        List<String> result = new ArrayList();
+        boolean[] checked = new boolean[input.length()];
+        generateDe(input, "", result, checked);
 
+        return result;
+    }  
+    // for distinct elements
+    private static void generateDe(String input, String cur, List<String> result, boolean[] checked){
+        if(cur.length() == input.length()) {
+            result.add(cur);
+        }
+        for(int i = 0; i < input.length(); i++){
+            if(checked[i] || input.charAt(i) == input.charAt(cur.length())) continue; // skip the same character at specific position
+            checked[i] = true;
+            generateDe(input, cur + input.charAt(i), result, checked);
+            checked[i] = false; 
+        }
+    }
 
 
 }
